@@ -1,11 +1,13 @@
 {
   "name": "opero_backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "description": "Opero Social Community Backend",
+  "main": "dist/server.js",
+"scripts": {
+  "dev": "tsx watch server.ts",
+  "build": "tsc",
+  "start": "node dist/server.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -29,7 +31,12 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.5.1",
     "nodemon": "^3.1.14",
-    "prisma": "^7.10.0"
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
   }
 }
