@@ -1,3 +1,4 @@
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useRef, useState } from 'react';
 import {
   FlatList,
@@ -12,6 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Ellipse, Circle, Line } from 'react-native-svg';
+import type { RootStackParamList } from '../../navigation/AppNavigator';
 import { colors } from '../../theme/colors';
 
 const LANGUAGES = ['EN', 'AR'];
@@ -37,7 +39,9 @@ const SLIDES = [
   },
 ];
 
-function WelcomeScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
+
+function WelcomeScreen({ navigation }: Props) {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [page, setPage] = useState(0);
@@ -50,13 +54,17 @@ function WelcomeScreen() {
     setPage(Math.round(e.nativeEvent.contentOffset.x / width));
   };
 
+  const isLast = page === SLIDES.length - 1;
+
   const goNext = () => {
+    if (isLast) {
+      navigation.navigate('Login');
+      return;
+    }
     const next = Math.min(page + 1, SLIDES.length - 1);
     listRef.current?.scrollToIndex({ index: next, animated: true });
     setPage(next);
   };
-
-  const isLast = page === SLIDES.length - 1;
 
   return (
     <View style={styles.container}>
