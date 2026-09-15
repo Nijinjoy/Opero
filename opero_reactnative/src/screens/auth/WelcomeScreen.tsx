@@ -1,4 +1,4 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { StackScreenProps } from '@react-navigation/stack';
 import { useRef, useState } from 'react';
 import {
   FlatList,
@@ -39,7 +39,7 @@ const SLIDES = [
   },
 ];
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
+type Props = StackScreenProps<RootStackParamList, 'Welcome'>;
 
 function WelcomeScreen({ navigation }: Props) {
   const { width } = useWindowDimensions();
@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
   image: {
     width: 160,
     height: 160,
+    tintColor: colors.brand,
   },
   title: {
     fontFamily: 'PlusJakartaSans-ExtraBold',
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 18,
-    backgroundColor: colors.gold,
+    backgroundColor: colors.brand,
   },
   button: {
     width: 56,
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.gold,
+    backgroundColor: colors.brand,
   },
   buttonText: {
     fontSize: 20,

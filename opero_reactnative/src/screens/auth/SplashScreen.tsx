@@ -1,11 +1,11 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { StackScreenProps } from '@react-navigation/stack';
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
 import { colors } from '../../theme/colors';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
+type Props = StackScreenProps<RootStackParamList, 'Splash'>;
 
 function SplashScreen({ navigation }: Props) {
   useEffect(() => {

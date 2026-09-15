@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.gold,
+    backgroundColor: colors.brand,
   },
   buttonDisabled: {
     opacity: 0.5,
