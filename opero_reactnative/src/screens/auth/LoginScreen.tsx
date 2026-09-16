@@ -1,6 +1,7 @@
 import type { StackScreenProps } from '@react-navigation/stack';
 import type { ComponentRef } from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -17,6 +18,8 @@ import Button from '../../components/Button';
 import PhoneInput from '../../components/PhoneInput';
 import { DEFAULT_COUNTRY } from '../../data/countries';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
+import { ApiError } from '../../services/apiClient';
+import * as authService from '../../services/authService';
 import { colors } from '../../theme/colors';
 
 const MIN_PHONE_LENGTH = 10;
@@ -24,7 +27,13 @@ const MIN_PHONE_LENGTH = 10;
 type Props = StackScreenProps<RootStackParamList, 'Login'>;
 
 function LoginScreen({ navigation }: Props) {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+  const rtlTextStyle = { textAlign: 'auto' as const, writingDirection: isRTL ? ('rtl' as const) : ('ltr' as const) };
   const insets = useSafeAreaInsets();
+  useEffect(() => {
+    i18n.changeLanguage('ar');
+  }, [i18n]);
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
@@ -36,11 +45,13 @@ function LoginScreen({ navigation }: Props) {
     if (error) setError('');
   };
 
-  const sendOtp = () => {
+  const dialCode = `+${country.callingCode[0]}`;
+
+  const sendOtp = async () => {
     const trimmed = phone.trim();
 
     if (trimmed.length < MIN_PHONE_LENGTH) {
-      setError(`Enter a valid ${MIN_PHONE_LENGTH}-digit phone number`);
+      setError(t('login.errors.invalidPhone', { length: MIN_PHONE_LENGTH }));
       phoneInputRef.current?.focus();
       return;
     }
@@ -48,14 +59,14 @@ function LoginScreen({ navigation }: Props) {
     Keyboard.dismiss();
     setSubmitting(true);
 
-    // simulate the OTP request; wire up to the real API when available
-    setTimeout(() => {
+    try {
+      await authService.sendOtp(`${dialCode}${trimmed}`);
+      navigation.navigate('VerifyOtp', { dialCode, phone: trimmed });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('login.errors.sendOtpFailed'));
+    } finally {
       setSubmitting(false);
-      navigation.navigate('VerifyOtp', {
-        dialCode: `+${country.callingCode[0]}`,
-        phone: trimmed,
-      });
-    }, 800);
+    }
   };
 
   return (
@@ -66,16 +77,16 @@ function LoginScreen({ navigation }: Props) {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={[styles.content, { paddingTop: insets.top + 12 }]}>
           <Pressable
-            style={styles.backButton}
+            style={[styles.backButton, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}
             onPress={() => navigation.goBack()}
             hitSlop={12}
           >
             <Text style={styles.backText}>‹</Text>
           </Pressable>
 
-          <Text style={styles.eyebrow}>Welcome to Opero</Text>
-          <Text style={styles.title}>Enter your phone number</Text>
-          <Text style={styles.subtitle}>We'll send you a one-time code to verify it's you.</Text>
+          <Text style={[styles.eyebrow, rtlTextStyle]}>{t('login.eyebrow')}</Text>
+          <Text style={[styles.title, rtlTextStyle]}>{t('login.title')}</Text>
+          <Text style={[styles.subtitle, rtlTextStyle]}>{t('login.subtitle')}</Text>
 
           <PhoneInput
             ref={phoneInputRef}
@@ -90,7 +101,7 @@ function LoginScreen({ navigation }: Props) {
           />
 
           <Button
-            label="Send OTP"
+            label={t('login.sendOtp')}
             onPress={sendOtp}
             loading={submitting}
             style={styles.button}

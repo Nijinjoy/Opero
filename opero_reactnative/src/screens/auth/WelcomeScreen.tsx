@@ -1,10 +1,9 @@
 import type { StackScreenProps } from '@react-navigation/stack';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   Pressable,
   StyleSheet,
   Text,
@@ -13,55 +12,43 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Ellipse, Circle, Line } from 'react-native-svg';
+import { SUPPORTED_LANGUAGES } from '../../localisation/i18n';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
 import { colors } from '../../theme/colors';
 
-const LANGUAGES = ['EN', 'AR'];
+const SLIDE_IMAGES = {
+  community: require('../../assets/images/group.png'),
+  share: require('../../assets/images/share.png'),
+  events: require('../../assets/images/events.png'),
+} as const;
 
-const SLIDES = [
-  {
-    key: 'community',
-    title: 'Find Your Community',
-    subtitle: 'Connect with people who share your interests, culture and city.',
-    image: require('../../assets/images/group.png'),
-  },
-  {
-    key: 'share',
-    title: 'Share Your Story',
-    subtitle: 'Post moments, updates and events for the community to see.',
-    image: require('../../assets/images/share.png'),
-  },
-  {
-    key: 'events',
-    title: 'Never Miss an Event',
-    subtitle: 'Discover meetups and gatherings happening near you.',
-    image: require('../../assets/images/events.png'),
-  },
-];
+const SLIDE_KEYS = ['community', 'share', 'events'] as const;
+type SlideKey = (typeof SLIDE_KEYS)[number];
 
 type Props = StackScreenProps<RootStackParamList, 'Welcome'>;
 
 function WelcomeScreen({ navigation }: Props) {
+  const { t, i18n } = useTranslation();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [page, setPage] = useState(0);
-  const [langIndex, setLangIndex] = useState(0);
   const listRef = useRef<FlatList>(null);
 
-  const cycleLanguage = () => setLangIndex(i => (i + 1) % LANGUAGES.length);
+  const langIndex = Math.max(0, SUPPORTED_LANGUAGES.indexOf(i18n.language as (typeof SUPPORTED_LANGUAGES)[number]));
 
-  const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    setPage(Math.round(e.nativeEvent.contentOffset.x / width));
+  const cycleLanguage = () => {
+    const next = SUPPORTED_LANGUAGES[(langIndex + 1) % SUPPORTED_LANGUAGES.length];
+    i18n.changeLanguage(next);
   };
 
-  const isLast = page === SLIDES.length - 1;
+  const isLast = page === SLIDE_KEYS.length - 1;
 
   const goNext = () => {
     if (isLast) {
       navigation.navigate('Login');
       return;
     }
-    const next = Math.min(page + 1, SLIDES.length - 1);
+    const next = Math.min(page + 1, SLIDE_KEYS.length - 1);
     listRef.current?.scrollToIndex({ index: next, animated: true });
     setPage(next);
   };
@@ -77,32 +64,31 @@ function WelcomeScreen({ navigation }: Props) {
           <Ellipse cx={8} cy={8} rx={3.2} ry={7} stroke={colors.ink} strokeWidth={1.3} fill="none" />
           <Line x1={1} y1={8} x2={15} y2={8} stroke={colors.ink} strokeWidth={1.3} />
         </Svg>
-        <Text style={styles.langText}>{LANGUAGES[langIndex]}</Text>
+        <Text style={styles.langText}>{i18n.language.toUpperCase()}</Text>
       </Pressable>
 
       <FlatList
         ref={listRef}
-        data={SLIDES}
-        keyExtractor={item => item.key}
+        data={SLIDE_KEYS}
+        keyExtractor={key => key}
         horizontal
         pagingEnabled
         scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onScrollEnd}
         getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
-        renderItem={({ item }) => (
+        renderItem={({ item: key }: { item: SlideKey }) => (
           <View style={[styles.slide, { width }]}>
-            <Image source={item.image} style={styles.image} resizeMode="contain" />
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.subtitle}>{item.subtitle}</Text>
+            <Image source={SLIDE_IMAGES[key]} style={styles.image} resizeMode="contain" />
+            <Text style={styles.title}>{t(`welcome.slides.${key}.title`)}</Text>
+            <Text style={styles.subtitle}>{t(`welcome.slides.${key}.subtitle`)}</Text>
           </View>
         )}
       />
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { marginBottom: 40 + insets.bottom }]}>
         <View style={styles.dots}>
-          {SLIDES.map((slide, i) => (
-            <View key={slide.key} style={[styles.dot, i === page && styles.dotActive]} />
+          {SLIDE_KEYS.map((key, i) => (
+            <View key={key} style={[styles.dot, i === page && styles.dotActive]} />
           ))}
         </View>
 
@@ -118,6 +104,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    direction: 'ltr',
   },
   langButton: {
     position: 'absolute',
@@ -167,7 +154,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    marginBottom: 40,
   },
   dots: {
     flexDirection: 'row',

@@ -1,0 +1,38 @@
+diff --git a/node_modules/react-native-country-picker-modal/lib/commonjs/CountryText.js b/node_modules/react-native-country-picker-modal/lib/commonjs/CountryText.js
+index 34eb3c1..3fe2e73 100644
+--- a/node_modules/react-native-country-picker-modal/lib/commonjs/CountryText.js
++++ b/node_modules/react-native-country-picker-modal/lib/commonjs/CountryText.js
+@@ -18,7 +18,9 @@ const CountryText = props => {
+     style: [{
+       fontFamily,
+       fontSize,
+-      color: onBackgroundTextColor
++      color: onBackgroundTextColor,
++      textAlign: 'auto',
++      writingDirection: _reactNative.I18nManager.isRTL ? 'rtl' : 'ltr'
+     }, props.style]
+   });
+ };
+diff --git a/node_modules/react-native-country-picker-modal/lib/module/CountryText.js b/node_modules/react-native-country-picker-modal/lib/module/CountryText.js
+index b7923be..2dde94a 100644
+--- a/node_modules/react-native-country-picker-modal/lib/module/CountryText.js
++++ b/node_modules/react-native-country-picker-modal/lib/module/CountryText.js
+@@ -1,6 +1,6 @@
+ "use strict";
+ 
+-import { Text } from 'react-native';
++import { I18nManager, Text } from 'react-native';
+ import { useTheme } from "./CountryTheme.js";
+ import { jsx as _jsx } from "react/jsx-runtime";
+ export const CountryText = props => {
+@@ -14,7 +14,9 @@ export const CountryText = props => {
+     style: [{
+       fontFamily,
+       fontSize,
+-      color: onBackgroundTextColor
++      color: onBackgroundTextColor,
++      textAlign: 'auto',
++      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr'
+     }, props.style]
+   });
+ };

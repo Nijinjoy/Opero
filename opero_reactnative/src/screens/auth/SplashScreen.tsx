@@ -1,5 +1,6 @@
 import type { StackScreenProps } from '@react-navigation/stack';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
@@ -8,6 +9,8 @@ import { colors } from '../../theme/colors';
 type Props = StackScreenProps<RootStackParamList, 'Splash'>;
 
 function SplashScreen({ navigation }: Props) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     const timer = setTimeout(() => navigation.replace('Welcome'), 2000);
     return () => clearTimeout(timer);
@@ -22,9 +25,9 @@ function SplashScreen({ navigation }: Props) {
           <Circle cx={16} cy={46} r={6} fill={colors.gold} />
           <Circle cx={48} cy={46} r={6} fill={colors.gold} />
         </Svg>
-        <Text style={styles.wordmark}>Opero</Text>
+        <Text style={styles.wordmark}>{t('common.appName')}</Text>
       </View>
-      <Text style={styles.tagline}>WHERE COMMUNITIES CONNECT</Text>
+      <Text style={styles.tagline}>{t('splash.tagline')}</Text>
       <View style={styles.rule} />
     </View>
   );

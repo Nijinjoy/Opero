@@ -1,0 +1,47 @@
+{
+  "common": {
+    "appName": "Opero",
+    "tryAgain": "Try again.",
+    "loading": "Loading..."
+  },
+  "splash": {
+    "tagline": "WHERE COMMUNITIES CONNECT"
+  },
+  "welcome": {
+    "slides": {
+      "community": {
+        "title": "Find Your Community",
+        "subtitle": "Connect with people who share your interests, culture and city."
+      },
+      "share": {
+        "title": "Share Your Story",
+        "subtitle": "Post moments, updates and events for the community to see."
+      },
+      "events": {
+        "title": "Never Miss an Event",
+        "subtitle": "Discover meetups and gatherings happening near you."
+      }
+    }
+  },
+  "login": {
+    "eyebrow": "Welcome to Opero",
+    "title": "Enter your phone number",
+    "subtitle": "We'll send you a one-time code to verify it's you.",
+    "sendOtp": "Send OTP",
+    "errors": {
+      "invalidPhone": "Enter a valid {{length}}-digit phone number",
+      "sendOtpFailed": "Could not send OTP. Try again."
+    }
+  },
+  "verifyOtp": {
+    "title": "Verify your number",
+    "subtitle": "Enter the {{length}}-digit code sent to {{dialCode}} {{phone}}",
+    "verify": "Verify",
+    "resendCode": "Resend code",
+    "resendCodeIn": "Resend code in {{seconds}}s",
+    "errors": {
+      "verifyFailed": "Could not verify code. Try again.",
+      "resendFailed": "Could not resend code. Try again."
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import type { StackScreenProps } from '@react-navigation/stack';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -14,6 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Button from '../../components/Button';
 import OtpInput from '../../components/OtpInput';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
+import { ApiError } from '../../services/apiClient';
+import * as authService from '../../services/authService';
 import { colors } from '../../theme/colors';
 
 const OTP_LENGTH = 6;
@@ -22,6 +25,7 @@ const RESEND_SECONDS = 30;
 type Props = StackScreenProps<RootStackParamList, 'VerifyOtp'>;
 
 function VerifyOtpScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const { dialCode, phone } = route.params;
   const insets = useSafeAreaInsets();
   const [otp, setOtp] = useState('');
@@ -36,18 +40,23 @@ function VerifyOtpScreen({ navigation, route }: Props) {
   }, [secondsLeft]);
 
   const canVerify = otp.length === OTP_LENGTH;
+  const fullPhone = `${dialCode}${phone}`;
 
-  const verifyOtp = () => {
+  const verifyOtp = async () => {
     if (!canVerify || submitting) return;
 
     Keyboard.dismiss();
     setSubmitting(true);
 
-    // simulate the verify request; wire up to the real API when available
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      await authService.verifyOtp(fullPhone, otp);
       // navigate to home / next step once verification succeeds
-    }, 800);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('verifyOtp.errors.verifyFailed'));
+      setOtp('');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // auto-submit as soon as the last digit is entered
@@ -60,11 +69,17 @@ function VerifyOtpScreen({ navigation, route }: Props) {
     if (error) setError('');
   };
 
-  const resendOtp = () => {
+  const resendOtp = async () => {
     if (secondsLeft > 0 || submitting) return;
     setOtp('');
     setError('');
-    setSecondsLeft(RESEND_SECONDS);
+
+    try {
+      await authService.sendOtp(fullPhone);
+      setSecondsLeft(RESEND_SECONDS);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('verifyOtp.errors.resendFailed'));
+    }
   };
 
   return (
@@ -82,9 +97,9 @@ function VerifyOtpScreen({ navigation, route }: Props) {
             <Text style={styles.backText}>‹</Text>
           </Pressable>
 
-          <Text style={styles.title}>Verify your number</Text>
+          <Text style={styles.title}>{t('verifyOtp.title')}</Text>
           <Text style={styles.subtitle}>
-            Enter the {OTP_LENGTH}-digit code sent to {dialCode} {phone}
+            {t('verifyOtp.subtitle', { length: OTP_LENGTH, dialCode, phone })}
           </Text>
 
           <OtpInput
@@ -98,7 +113,7 @@ function VerifyOtpScreen({ navigation, route }: Props) {
           {!!error && <Text style={styles.errorText}>{error}</Text>}
 
           <Button
-            label="Verify"
+            label={t('verifyOtp.verify')}
             onPress={verifyOtp}
             disabled={!canVerify}
             loading={submitting}
@@ -111,7 +126,9 @@ function VerifyOtpScreen({ navigation, route }: Props) {
             disabled={secondsLeft > 0 || submitting}
           >
             <Text style={styles.resendText}>
-              {secondsLeft > 0 ? `Resend code in ${secondsLeft}s` : 'Resend code'}
+              {secondsLeft > 0
+                ? t('verifyOtp.resendCodeIn', { seconds: secondsLeft })
+                : t('verifyOtp.resendCode')}
             </Text>
           </Pressable>
         </View>

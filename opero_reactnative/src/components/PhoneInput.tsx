@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import type { ComponentRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatListProps, StyleSheet, Text, TextInput, View } from 'react-native';
 import CountryPicker, { Country } from 'react-native-country-picker-modal';
 import { colors } from '../theme/colors';
@@ -32,6 +33,9 @@ const PhoneInput = forwardRef<ComponentRef<typeof TextInput>, Props>(function Ph
   },
   ref,
 ) {
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
   return (
     <View>
       <View style={[styles.row, !!error && styles.rowError]}>
@@ -70,7 +74,16 @@ const PhoneInput = forwardRef<ComponentRef<typeof TextInput>, Props>(function Ph
           onSubmitEditing={onSubmitEditing}
         />
       </View>
-      {!!error && <Text style={styles.errorText}>{error}</Text>}
+      {!!error && (
+        <Text
+          style={[
+            styles.errorText,
+            { textAlign: 'auto', writingDirection: isRTL ? 'rtl' : 'ltr' },
+          ]}
+        >
+          {error}
+        </Text>
+      )}
     </View>
   );
 });
